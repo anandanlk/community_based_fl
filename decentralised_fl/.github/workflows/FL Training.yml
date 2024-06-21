@@ -1,0 +1,26 @@
+name: Perform FL Training
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: ./Actions_workflow
+
+jobs:
+  run_federated_learning:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Install dependencies
+        run: pip install -r requirements_git_actions.txt
+      - name: Install yaml
+        run: pip install pyyaml;
+      - name: Running Decentralized Federated Learning
+        working-directory: ./CWL_Workflow
+        run: time cwltool --enable-ext --parallel decentralizedFL.cwl decentralized_input.yml

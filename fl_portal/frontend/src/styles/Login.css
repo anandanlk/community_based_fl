@@ -1,0 +1,32 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.form {
+    width: 300px;
+    text-align: center;
+}
+.error {
+    color: red;
+}
+.input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    margin-top: 5px;
+}
+.mb-10 {
+    margin-bottom: 10px;
+}
+.mb-20 {
+    margin-bottom: 20px;
+}
+.button-group {
+    display: flex;
+    justify-content: space-between;
+}
+.button {
+    width: 48%;
+}

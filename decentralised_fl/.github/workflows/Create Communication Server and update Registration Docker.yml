@@ -1,0 +1,72 @@
+name: Create Communication Server and update Client Registration Docker
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: ./Actions_workflow
+
+jobs:
+  deploy_communication_server:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install AWS CLI
+        run: |
+          pip3 install awscli
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Apply Terraform
+        run: |
+          terraform apply -auto-approve
+          echo "COMMUNICATION_IP=$(terraform output -raw CommunicationServerIpDecentralized)" >> $GITHUB_ENV
+          touch communication.env
+          echo $(terraform output -raw CommunicationServerIpDecentralized) > communication.env
+
+      - name: Update communication server IP
+        working-directory: ./CWL_Workflow
+        run: |
+          sed -E -i.backup 's/(communication_server_ip: ).*/\1http:\/\/${{ env.COMMUNICATION_IP }}/' decentralized_input.yml
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Add communication server IP to env file and decentralized_input.yml"
+          file_pattern: "*.env *.yml"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Docker Repository
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push multi-platform Docker image
+        uses: docker/build-push-action@v2
+        with:
+          file: ./Dockers_source_code/client_registration/Dockerfile
+          context: ./Dockers_source_code/client_registration/
+          push: true
+          tags: anandanlk/client_register_test:latest
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            COMMUNICATION_IP=http://${{ env.COMMUNICATION_IP }}
