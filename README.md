@@ -22,6 +22,8 @@
 
 ## Video demonstration
 
+https://github.com/anandanlk/community_based_fl/releases/download/v1.0/Demo.mp4
+
 ## Using this demo: https://github.com/anandanlk/community_based_fl/blob/master/Demo/Demo.mp4
 
 > **_Please note:_** We are not responsible for any use or misuse of the code or its consequences. For example we are not responsible for any expenses if you are using your own AWS or GCP account while using this demo nor for any security concerns.
